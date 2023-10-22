@@ -60,26 +60,23 @@ if (!function_exists('sys_config')) {
      * 获取系统单个配置
      * @param string $name
      * @param string $default
-     * @return string
+     * @return array|string
      */
-    function sys_config(string $name, $default = '')
+    function sys_config(string $name, string $default = ''): array|string
     {
-        if (empty($name))
-            return $default;
+        if (empty($name)) return $default;
         $sysConfig = app('sysConfig')->get($name);
-        if (is_array($sysConfig)) {
-            foreach ($sysConfig as &$item) {
-                if (strpos($item, '/uploads/system/') !== false) $item = set_file_url($item);
-            }
-        } else {
-            if (strpos($sysConfig, '/uploads/system/') !== false) $sysConfig = set_file_url($sysConfig);
+
+        if(empty($sysConfig)) return $default;
+
+        $arr_back = is_array($sysConfig);
+        if(!$arr_back) $sysConfig = [$sysConfig];
+
+        foreach ($sysConfig as &$item) {
+            if (str_contains($item, '/uploads/system/')) $item = set_file_url($item);
         }
-        $config = is_array($sysConfig) ? $sysConfig : trim($sysConfig);
-        if ($config === '' || $config === false) {
-            return $default;
-        } else {
-            return $config;
-        }
+
+        return $arr_back ? $sysConfig : current($sysConfig);
     }
 }
 

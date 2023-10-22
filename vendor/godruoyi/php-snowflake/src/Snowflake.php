@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the godruoyi/php-snowflake.
  *
@@ -10,80 +12,69 @@
 
 namespace Godruoyi\Snowflake;
 
+use Closure;
+
 class Snowflake
 {
-    const MAX_TIMESTAMP_LENGTH = 41;
+    public const MAX_TIMESTAMP_LENGTH = 41;
 
-    const MAX_DATACENTER_LENGTH = 5;
+    public const MAX_DATACENTER_LENGTH = 5;
 
-    const MAX_WORKID_LENGTH = 5;
+    public const MAX_WORKID_LENGTH = 5;
 
-    const MAX_SEQUENCE_LENGTH = 12;
+    public const MAX_SEQUENCE_LENGTH = 12;
 
-    const MAX_FIRST_LENGTH = 1;
+    public const MAX_SEQUENCE_SIZE = (-1 ^ (-1 << self::MAX_SEQUENCE_LENGTH));
 
     /**
      * The data center id.
-     *
-     * @var int
      */
-    protected $datacenter;
+    protected int $datacenter;
 
     /**
      * The worker id.
-     *
-     * @var int
      */
-    protected $workerid;
+    protected int $workerId;
 
     /**
      * The Sequence Resolver instance.
      *
-     * @var \Godruoyi\Snowflake\SequenceResolver|null
+     * @var Closure|SequenceResolver|null
      */
-    protected $sequence;
+    protected SequenceResolver|null|Closure $sequence = null;
 
     /**
      * The start timestamp.
-     *
-     * @var int
      */
-    protected $startTime;
+    protected ?int $startTime = null;
 
     /**
      * Default sequence resolver.
-     *
-     * @var \Godruoyi\Snowflake\SequenceResolver|null
      */
-    protected $defaultSequenceResolver;
+    protected ?SequenceResolver $defaultSequenceResolver = null;
 
     /**
      * Build Snowflake Instance.
-     *
-     * @param int $datacenter
-     * @param int $workerid
      */
-    public function __construct(int $datacenter = null, int $workerid = null)
+    public function __construct(int $datacenter = 0, int $workerId = 0)
     {
         $maxDataCenter = -1 ^ (-1 << self::MAX_DATACENTER_LENGTH);
         $maxWorkId = -1 ^ (-1 << self::MAX_WORKID_LENGTH);
 
         // If not set datacenter or workid, we will set a default value to use.
-        $this->datacenter = $datacenter > $maxDataCenter || $datacenter < 0 ? mt_rand(0, 31) : $datacenter;
-        $this->workerid = $workerid > $maxWorkId || $workerid < 0 ? mt_rand(0, 31) : $workerid;
+        $this->datacenter = $datacenter > $maxDataCenter || $datacenter < 0 ? random_int(0, 31) : $datacenter;
+        $this->workerId = $workerId > $maxWorkId || $workerId < 0 ? random_int(0, 31) : $workerId;
     }
 
     /**
      * Get snowflake id.
-     *
-     * @return string
      */
-    public function id()
+    public function id(): string
     {
-        $currentTime = $this->getCurrentMicrotime();
+        $currentTime = $this->getCurrentMillisecond();
         while (($sequence = $this->callResolver($currentTime)) > (-1 ^ (-1 << self::MAX_SEQUENCE_LENGTH))) {
             usleep(1);
-            $currentTime = $this->getCurrentMicrotime();
+            $currentTime = $this->getCurrentMillisecond();
         }
 
         $workerLeftMoveLength = self::MAX_SEQUENCE_LENGTH;
@@ -92,16 +83,18 @@ class Snowflake
 
         return (string) ((($currentTime - $this->getStartTimeStamp()) << $timestampLeftMoveLength)
             | ($this->datacenter << $datacenterLeftMoveLength)
-            | ($this->workerid << $workerLeftMoveLength)
+            | ($this->workerId << $workerLeftMoveLength)
             | ($sequence));
     }
 
     /**
      * Parse snowflake id.
+     *
+     * @return array<string, float|int|string>
      */
-    public function parseId(string $id, $transform = false): array
+    public function parseId(string $id, bool $transform = false): array
     {
-        $id = decbin($id);
+        $id = decbin((int) $id);
 
         $data = [
             'timestamp' => substr($id, 0, -22),
@@ -110,51 +103,49 @@ class Snowflake
             'datacenter' => substr($id, -22, 5),
         ];
 
-        return $transform ? array_map(function ($value) {
+        return $transform ? array_map(static function ($value) {
             return bindec($value);
         }, $data) : $data;
     }
 
     /**
-     * Get current microtime timestamp.
-     *
-     * @return int
+     * Get current millisecond time.
      */
-    public function getCurrentMicrotime()
+    public function getCurrentMillisecond(): int
     {
         return floor(microtime(true) * 1000) | 0;
     }
 
     /**
      * Set start time (millisecond).
+     *
+     * @throws SnowflakeException
      */
-    public function setStartTimeStamp(int $startTime)
+    public function setStartTimeStamp(int $millisecond): self
     {
-        $missTime = $this->getCurrentMicrotime() - $startTime;
+        $missTime = $this->getCurrentMillisecond() - $millisecond;
 
         if ($missTime < 0) {
-            throw new \Exception('The start time cannot be greater than the current time');
+            throw new SnowflakeException('The start time cannot be greater than the current time');
         }
 
         $maxTimeDiff = -1 ^ (-1 << self::MAX_TIMESTAMP_LENGTH);
 
         if ($missTime > $maxTimeDiff) {
-            throw new \Exception(sprintf('The current microtime - starttime is not allowed to exceed -1 ^ (-1 << %d), You can reset the start time to fix this', self::MAX_TIMESTAMP_LENGTH));
+            throw new SnowflakeException(sprintf('The current microtime - starttime is not allowed to exceed -1 ^ (-1 << %d), You can reset the start time to fix this', self::MAX_TIMESTAMP_LENGTH));
         }
 
-        $this->startTime = $startTime;
+        $this->startTime = $millisecond;
 
         return $this;
     }
 
     /**
      * Get start timestamp (millisecond), If not set default to 2019-08-08 08:08:08.
-     *
-     * @return int
      */
-    public function getStartTimeStamp()
+    public function getStartTimeStamp(): float|int
     {
-        if ($this->startTime > 0) {
+        if (! is_null($this->startTime)) {
             return $this->startTime;
         }
 
@@ -166,10 +157,8 @@ class Snowflake
 
     /**
      * Set Sequence Resolver.
-     *
-     * @param SequenceResolver|callable $sequence
      */
-    public function setSequenceResolver($sequence)
+    public function setSequenceResolver(Closure|SequenceResolver $sequence): self
     {
         $this->sequence = $sequence;
 
@@ -178,18 +167,14 @@ class Snowflake
 
     /**
      * Get Sequence Resolver.
-     *
-     * @return \Godruoyi\Snowflake\SequenceResolver|callable|null
      */
-    public function getSequenceResolver()
+    public function getSequenceResolver(): null|Closure|SequenceResolver
     {
         return $this->sequence;
     }
 
     /**
      * Get Default Sequence Resolver.
-     *
-     * @return \Godruoyi\Snowflake\SequenceResolver
      */
     public function getDefaultSequenceResolver(): SequenceResolver
     {
@@ -198,21 +183,16 @@ class Snowflake
 
     /**
      * Call resolver.
-     *
-     * @param callable|\Godruoyi\Snowflake\SequenceResolver $resolver
-     * @param int                                           $maxSequence
-     *
-     * @return int
      */
-    protected function callResolver($currentTime)
+    protected function callResolver(int $currentTime): int
     {
         $resolver = $this->getSequenceResolver();
 
-        if (is_callable($resolver)) {
+        if (! is_null($resolver) && is_callable($resolver)) {
             return $resolver($currentTime);
         }
 
-        return is_null($resolver) || !($resolver instanceof SequenceResolver)
+        return ! ($resolver instanceof SequenceResolver)
             ? $this->getDefaultSequenceResolver()->sequence($currentTime)
             : $resolver->sequence($currentTime);
     }

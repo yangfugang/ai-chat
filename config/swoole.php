@@ -1,6 +1,6 @@
 <?php
 
-use app\webscoket\Manager;
+use app\webscoket\Handler;
 use Swoole\Table;
 
 return [
@@ -9,27 +9,19 @@ return [
         'host' => env('SWOOLE_HOST', '0.0.0.0'),
         'port' => env('SWOOLE_PORT', 20108),
         'worker_num' => swoole_cpu_num() * 4,
-//        'mode'      => SWOOLE_PROCESS, // 运行模式 默认为SWOOLE_PROCESS
-//        'sock_type' => SWOOLE_SOCK_TCP, // sock type 默认为SWOOLE_SOCK_TCP
         'options'   => [
-//            'pid_file'              => runtime_path() . 'swoole.pid',
-//            'log_file'              => runtime_path() . 'swoole.log',
-//            'daemonize'             => true,//是否守护进程
-//            // Normally this value should be 1~4 times larger according to your cpu cores.
-//            'reactor_num'           => swoole_cpu_num() * 4,
-//            'worker_num'            => swoole_cpu_num() * 4,
-//            'task_worker_num'       => swoole_cpu_num() * 4,
-//            'task_enable_coroutine' => true,
-//            'enable_static_handler' => true,
-            'document_root'         => root_path('public'),
-//            'package_max_length'    => 20 * 1024 * 1024,
-//            'buffer_output_size'    => 10 * 1024 * 1024,
-//            'socket_buffer_size'    => 128 * 1024 * 1024,
+            'daemonize'             => true,//是否守护进程
+            // Normally this value should be 1~4 times larger according to your cpu cores.
+            'reactor_num'           => swoole_cpu_num() * 4,
+            'package_max_length'    => 20 * 1024 * 1024,
+            'buffer_output_size'    => 10 * 1024 * 1024,
+            'socket_buffer_size'    => 128 * 1024 * 1024,
         ],
     ],
     'websocket' => [
         'enable' => true,
-        'handler' => Manager::class,
+        'handler' => Handler::class,
+        #'handler' => \think\swoole\websocket\Handler::class,
         'ping_interval' => 25000,
         'ping_timeout' => 60000,
         'room' => [
@@ -41,8 +33,8 @@ return [
                 'client_size' => 2048,
             ],
             'redis' => [
-                'host'          => 'redis',
-                'port'          => 6379,
+                'host'          => env('REDIS_HOSTNAME', 'redis'),
+                'port'          => env('PORT', 6397),
                 'max_active'    => 10,
                 'max_wait_time' => 5,
             ],

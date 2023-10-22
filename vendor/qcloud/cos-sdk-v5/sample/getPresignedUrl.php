@@ -1,29 +1,30 @@
 <?php
 
-require dirname(__FILE__) . '/../vendor/autoload.php';
+require dirname(__FILE__, 2) . '/vendor/autoload.php';
 
-$secretId = "COS_SECRETID"; //"云 API 密钥 SecretId";
-$secretKey = "COS_SECRETKEY"; //"云 API 密钥 SecretKey";
-$region = "ap-beijing"; //设置一个默认的存储桶地域
+$secretId = "SECRETID"; //替换为用户的 secretId，请登录访问管理控制台进行查看和管理，https://console.cloud.tencent.com/cam/capi
+$secretKey = "SECRETKEY"; //替换为用户的 secretKey，请登录访问管理控制台进行查看和管理，https://console.cloud.tencent.com/cam/capi
+$region = "ap-beijing"; //替换为用户的 region，已创建桶归属的region可以在控制台查看，https://console.cloud.tencent.com/cos5/bucket
 $cosClient = new Qcloud\Cos\Client(
     array(
         'region' => $region,
         'schema' => 'https', //协议头部，默认为http
         'credentials'=> array(
-            'secretId'  => $secretId ,
+            'secretId'  => $secretId,
             'secretKey' => $secretKey)));
-$local_path = "/data/exampleobject";
 try {
     $signedUrl = $cosClient->getPresignedUrl(
-                                $method='putObject',
-                                $args=['Bucket'=>'examplebucket-1250000000', //格式：BucketName-APPID
-                                       'Key'=>'exampleobject',
-                                       'Body'=>''],
-                                $expires='+30 minutes"');
+                                $method='getObject',
+                                $args=array(
+                                    'Bucket'=>'examplebucket-1250000000', //存储桶名称，由BucketName-Appid 组成，可以在COS控制台查看 https://console.cloud.tencent.com/cos5/bucket
+                                    'Key'=>'exampleobject',
+                                    'Body'=>'',
+                                    'Params'=>array(),
+                                    'Headers'=>array()), //若上传加入headers，content-md5写法为"content-md5" => base64_encode( md5( Body, true ) )
+                                $expires='+30 minutes');
     // 请求成功
     echo($signedUrl);
 } catch (\Exception $e) {
     // 请求失败
     echo($e);
 }
-

@@ -11,6 +11,7 @@
 namespace app\controller\admin;
 
 
+use app\controller\admin\system\Log;
 use app\validate\system\SystemAdminValidata;
 use crmeb\utils\Captcha;
 use app\services\system\admin\SystemAdminServices;
@@ -32,6 +33,11 @@ class Login
      * @var Request
      */
     protected $request;
+
+    /**
+     * @var SystemAdminServices
+     */
+    protected $services;
 
     /**
      * Login constructor.

@@ -115,7 +115,7 @@ class SystemAttachmentServices extends BaseServices
     public function upload(int $pid, string $file, int $upload_type, int $type)
     {
         if ($upload_type == 0) {
-            $upload_type = sys_config('upload_type', 1);
+            $upload_type = sys_config('upload_type', '1');
         }
         try {
             $path = make_path('attach', 2, true);

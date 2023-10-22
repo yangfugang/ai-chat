@@ -1,26 +1,23 @@
 <div>
   <p align="center">
-    <image src="https://www.pngkey.com/png/full/105-1052235_snowflake-png-transparent-background-snowflake-with-clear-background.png" width="250" height="250">
+    <image src="https://www.pngkey.com/png/full/105-1052235_snowflake-png-transparent-background-snowflake-with-clear-background.png" width="250" height="250"></image>
   </p>
   <p align="center">An ID Generator for PHP based on Snowflake Algorithm (Twitter announced).</p>
   <p align="center">
-    <a href="https://scrutinizer-ci.com/g/godruoyi/php-snowflake/">
-      <image src="https://scrutinizer-ci.com/g/godruoyi/php-snowflake/badges/quality-score.png?b=master" alt="quality score">
+    <a href="https://github.com/godruoyi/php-snowflake/actions/workflows/test.yml">
+      <image src="https://github.com/godruoyi/php-snowflake/actions/workflows/test.yml/badge.svg" alt="build passed"></image>
     </a>
-<!--     <a href="https://scrutinizer-ci.com/g/godruoyi/php-snowflake/">
-      <image src="https://scrutinizer-ci.com/g/godruoyi/php-snowflake/badges/coverage.png?b=master" alt="php-snowflake">
-    </a> -->
+    <a href="https://codecov.io/gh/godruoyi/php-snowflake">
+      <img src="https://codecov.io/gh/godruoyi/php-snowflake/branch/master/graph/badge.svg?token=7AAOYCJK97"/>
+    </a>
     <a href="https://github.com/godruoyi/php-snowflake">
-      <image src="https://poser.pugx.org/godruoyi/php-snowflake/license" alt="License">
+      <image src="https://poser.pugx.org/godruoyi/php-snowflake/license" alt="License"></image>
     </a>
     <a href="https://packagist.org/packages/godruoyi/php-snowflake">
-      <image src="https://poser.pugx.org/godruoyi/php-snowflake/v/stable" alt="Packagist Version">
+      <image src="https://poser.pugx.org/godruoyi/php-snowflake/v/stable" alt="Packagist Version"></image>
     </a>
-    <a href="https://packagist.org/packages/godruoyi/php-snowflake">
-      <image src="https://scrutinizer-ci.com/g/godruoyi/php-snowflake/badges/build.png?b=master" alt="build passed">
-    </a>
-    <a href="https://packagist.org/packages/godruoyi/php-snowflake">
-      <image src="https://poser.pugx.org/godruoyi/php-snowflake/downloads" alt="Total Downloads">
+    <a href="https://github.com/godruoyi/php-snowflake">
+      <image src="https://poser.pugx.org/godruoyi/php-snowflake/downloads" alt="Total Downloads"></image>
     </a>
   </p>
 </div>
@@ -40,7 +37,7 @@ Snowflake 是 Twitter 内部的一个 ID 生算法，可以通过一些简单的
 
 需要注意的是：
 
-* 在分布式环境中，5 个 bit 位的 datacenter 和 worker 表示最多能部署 31 个数据中心，每个数据中心最多可部署 31 台节点
+* 在分布式环境中，5 个 bit 位的 datacenter 和 worker 表示最多能部署 31 个数据中心，每个数据中心最多可部署 31 台节点。
 * 41 位的二进制长度最多能表示 2^41 -1 毫秒即 69 年，所以雪花算法最多能正常使用 69 年，为了能最大限度的使用该算法，你应该为其指定一个开始时间。
 
 > 由上可知，雪花算法生成的 ID 并不能保证唯一，如当两个不同请求同一时刻进入相同的数据中心的相同节点时，而此时该节点生成的 sequence 又是相同时，就会导致生成的 ID 重复。
@@ -51,12 +48,14 @@ Snowflake 是 Twitter 内部的一个 ID 生算法，可以通过一些简单的
 * RedisSequenceResolver （基于 redis psetex 和 incrby 生成）
 * LaravelSequenceResolver（基于 redis psetex 和 incrby 生成）
 * SwooleSequenceResolver（基于 swoole_lock 锁）
+* FileLockResolver（基于 PHP 文件锁）
 
-不同的提供者只需要保证**同一毫秒生成的序列号不同**，就能得到唯一的 ID。
+> **Warning**
+> RandomSequenceResolver 序列号提供者在高并发情况下可能会导致生成的 ID 重复，如果你的应用场景中可能会出现高并发的情况，建议使用 RedisSequenceResolver 或者 LaravelSequenceResolver。
 
 ## 要求
 
-1. PHP >= 7.0
+1. PHP >= 8.1
 2. **[Composer](https://getcomposer.org/)**
 
 ## 安装
@@ -114,14 +113,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('snowflake', function () {
+        $this->app->singleton('snowflake', function ($app) {
             return (new Snowflake())
-                ->setStartTimeStamp(strtotime('2019-08-08')*1000)
-                ->setSequenceResolver(
-                    new LaravelSequenceResolver($this->app->get('cache')->store()
-                ));
+                ->setStartTimeStamp(strtotime('2019-10-10')*1000)
+                ->setSequenceResolver(new LaravelSequenceResolver($app->get('cache.store')));
         });
     }
+}
 }
 ```
 

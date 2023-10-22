@@ -259,7 +259,7 @@ class SystemMenusServices extends BaseServices
      * @param array $navList
      * @return array
      */
-    public function tidyMenuTier(bool $adminFilter = false, $menusList, int $pid = 0, array $navList = []): array
+    public function tidyMenuTier(bool $adminFilter, $menusList, int $pid = 0, array $navList = []): array
     {
         foreach ($menusList as $k => $menu) {
             $menu = $menu->getData();

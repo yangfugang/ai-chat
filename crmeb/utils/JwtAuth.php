@@ -15,6 +15,7 @@ namespace crmeb\utils;
 use crmeb\exceptions\AdminException;
 use crmeb\services\CacheService;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use think\facade\Env;
 
 /**
@@ -57,7 +58,7 @@ class JwtAuth
             'exp' => $exp,
         ];
         $params['jti'] = compact('id', 'type');
-        $token = JWT::encode($params, Env::get('app_key', $this->app_key));
+        $token = JWT::encode($params, Env::get('app_key', $this->app_key), 'HS256');
 
         return compact('token', 'params');
     }
@@ -81,8 +82,9 @@ class JwtAuth
     public function verifyToken()
     {
         JWT::$leeway = 60;
-
-        JWT::decode($this->token, Env::get('app_key', $this->app_key), array('HS256'));
+        $headers = new \stdClass();
+        $app_key = Env::get('app_key', $this->app_key);
+        JWT::decode($this->token, new Key($app_key, 'HS256'), $headers);
 
         $this->token = null;
     }

@@ -24,7 +24,7 @@ public class Context {
     /**
      * SDK版本号
      */
-    private final String sdkVersion;
+    private String sdkVersion;
 
     /**
      * 证书模式运行时环境
@@ -52,22 +52,30 @@ public class Context {
     }
 
     public String getConfig(String key) {
-        return (String) config.get(key);
+        if (String.valueOf(config.get(key)) == "null") {
+            return null;
+        } else {
+            return String.valueOf(config.get(key));
+        }
     }
 
     public String getSdkVersion() {
         return sdkVersion;
     }
 
+    public void setSdkVersion(String sdkVersion) {
+        this.sdkVersion = sdkVersion;
+    }
+
     public CertEnvironment getCertEnvironment() {
         return certEnvironment;
     }
 
-    public Signer getSigner(){
+    public Signer getSigner() {
         return signer;
     }
 
-    public void setSigner(Signer signer){
+    public void setSigner(Signer signer) {
         this.signer = signer;
     }
 }

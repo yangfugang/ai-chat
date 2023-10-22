@@ -115,20 +115,27 @@ class EasySDKKernel
      */
     public function toMultipartRequestBody($textParams, $fileParams, $boundary)
     {
-        $this->addOtherParams($textParams, null);
-        $fileField = new FileField();
-        $fileField->filename = $fileParams['image_content'];
-        $fileField->contentType = 'multipart/form-data;charset=utf-8;boundary=' . $boundary;
-        $fileField->content = new Stream(fopen($fileParams['image_content'], 'r'));
-        $map = [
-            'image_type' => $this->textParams['image_type'],
-            'image_name' => $this->textParams['image_name'],
-            'image_content' => $fileField
-        ];
-        $stream = FileForm::toFileForm($map, $boundary);
-        do {
-            $readLength = $stream->read(1024);
-        } while (0 != $readLength);
+        $this->textParams = $textParams;
+        if ($textParams != null && $this->optionalTextParams != null) {
+            $this->textParams = array_merge($textParams, $this->optionalTextParams);
+        } else if ($textParams == null) {
+            $this->textParams = $this->optionalTextParams;
+        }
+        if (count($fileParams) > 0) {
+
+            foreach ($fileParams as $key => $value) {
+                $fileField = new FileField();
+                $fileField->filename = $value;
+                $fileField->contentType = 'multipart/form-data;charset=utf-8;boundary=' . $boundary;
+                $fileField->content = new Stream(fopen($value, 'r'));
+                $this->textParams[$key] = $fileField;
+            }
+        }
+        $stream = FileForm::toFileForm($this->textParams, $boundary);
+
+//        do {
+//            $readLength = $stream->read(1024);
+//        } while (0 != $readLength);
         return $stream;
     }
 
@@ -151,7 +158,6 @@ class EasySDKKernel
             return $this->getGatewayServerUrl() . '?' . $this->buildQueryString($sortedMap);
         } elseif ($method == AlipayConstants::POST) {
             //采集并排序所有参数
-            $this->addOtherParams($textParams, $bizParams);
             $sortedMap = $this->getSortedMap($systemParams, $this->bizParams, $this->textParams);
             $sortedMap[AlipayConstants::SIGN_FIELD] = $sign;
             $pageUtil = new PageUtil();
@@ -351,9 +357,22 @@ class EasySDKKernel
 
     private function getSortedMap($systemParams, $bizParams, $textParams)
     {
-        $this->addOtherParams($textParams, $bizParams);
+        $this->textParams = $textParams;
+        $this->bizParams = $bizParams;
+        if ($textParams != null && $this->optionalTextParams != null) {
+            $this->textParams = array_merge($textParams, $this->optionalTextParams);
+        } else if ($textParams == null) {
+            $this->textParams = $this->optionalTextParams;
+        }
+        if ($bizParams != null && $this->optionalBizParams != null) {
+            $this->bizParams = array_merge($bizParams, $this->optionalBizParams);
+        } else if ($bizParams == null) {
+            $this->bizParams = $this->optionalBizParams;
+        }
         $json = new JsonUtil();
-        $bizParams = $json->toJsonString($this->bizParams);
+        if ($this->bizParams != null) {
+            $bizParams = $json->toJsonString($this->bizParams);
+        }
         $sortedMap = $systemParams;
         if (!empty($bizParams)) {
             $sortedMap[AlipayConstants::BIZ_CONTENT_FIELD] = json_encode($bizParams, JSON_UNESCAPED_UNICODE);
@@ -396,22 +415,6 @@ class EasySDKKernel
         }
         unset ($k, $v);
         return $stringToBeSigned;
-    }
-
-    private function addOtherParams($textParams, $bizParams)
-    {
-        if ($this->optionalTextParams == null) {
-            $this->textParams = $textParams;
-        }
-        if ($textParams != null && $this->optionalTextParams != null) {
-            $this->textParams = array_merge($textParams, $this->optionalTextParams);
-        }
-        if ($this->optionalBizParams == null) {
-            $this->bizParams = $bizParams;
-        }
-        if ($bizParams != null && $this->optionalBizParams != null) {
-            $this->bizParams = array_merge($bizParams, $this->optionalBizParams);
-        }
     }
 
     private function setNotifyUrl($params)

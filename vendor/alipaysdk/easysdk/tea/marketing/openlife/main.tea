@@ -168,6 +168,8 @@ api createImageTextContent(title: string, cover: string, content: string, conten
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -238,6 +240,8 @@ api modifyImageTextContent(contentId: string, title: string, cover: string, cont
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -306,6 +310,8 @@ api sendText(text: string): AlipayOpenPublicMessageTotalSendResponse {
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -369,6 +375,8 @@ api sendImageText(articles: [ Article ]): AlipayOpenPublicMessageTotalSendRespon
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -432,6 +440,8 @@ api sendSingleMessage(toUserId: string, template: Template): AlipayOpenPublicMes
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -494,6 +504,8 @@ api recallMessage(messageId: string): AlipayOpenPublicLifeMsgRecallResponse {
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -559,6 +571,8 @@ api setIndustry(primaryIndustryCode: string, primaryIndustryName: string, second
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {
@@ -620,6 +634,8 @@ api getIndustry(): AlipayOpenPublicSettingCategoryQueryResponse {
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 15000,
   readTimeout = 15000,
   retry = {

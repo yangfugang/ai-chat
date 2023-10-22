@@ -54,6 +54,7 @@ abstract class BaseDao
      */
     protected function setJoinModel(): string
     {
+        return '';
     }
 
     /**

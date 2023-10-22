@@ -13,6 +13,8 @@ public class Client {
 
     public AlipayOfflineMaterialImageUploadResponse upload(String imageName, String imageFilePath) throws Exception {
         java.util.Map<String, Object> runtime_ = TeaConverter.buildMap(
+            new TeaPair("ignoreSSL", _kernel.getConfig("ignoreSSL")),
+            new TeaPair("httpProxy", _kernel.getConfig("httpProxy")),
             new TeaPair("connectTimeout", 100000),
             new TeaPair("readTimeout", 100000),
             new TeaPair("retry", TeaConverter.buildMap(
@@ -91,7 +93,7 @@ public class Client {
                 if (Tea.isRetryable(e)) {
                     continue;
                 }
-                throw e;
+                throw new RuntimeException(e);
             }
         }
 

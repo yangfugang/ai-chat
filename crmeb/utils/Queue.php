@@ -125,19 +125,20 @@ class Queue
      * @param array|null $data
      * @return mixed
      */
-    public function push(?array $data = null)
+    public function push(array $data = null)
     {
         if (!$this->job) {
             return $this->setError('需要执行的队列类必须存在');
         }
         $jodValue = $this->getValues($data);
-        $res = QueueThink::{$this->action()}(...$jodValue);
-        if (!$res) {
+        $res = 0;
+        try {
             $res = QueueThink::{$this->action()}(...$jodValue);
-            if (!$res) {
-                Log::error('加入队列失败，参数：' . json_encode($this->getValues($data)));
-            }
+        } catch (\Exception $e) {
+            Log::error('加入队列失败，参数：' . json_encode($this->getValues($data)));
+            Log::error('文件：' . $e->getFile() . ' 行：' . $e->getLine() . ' 代码：' . $e->getCode());
         }
+
         $this->clean();
         return $res;
     }

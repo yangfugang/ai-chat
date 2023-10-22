@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the godruoyi/php-snowflake.
  *
@@ -14,61 +16,51 @@ class SwooleSequenceResolver implements SequenceResolver
 {
     /**
      * The las ttimestamp.
-     *
-     * @var null
      */
-    protected $lastTimeStamp = -1;
+    protected ?int $lastTimeStamp = -1;
 
     /**
      * The sequence.
-     *
-     * @var int
      */
-    protected $sequence = 0;
+    protected int $sequence = 0;
 
     /**
      * The swoole lock.
-     *
-     * @var mixed
      */
-    protected $lock;
+    protected \Swoole\Lock $lock;
 
     /**
      * The cycle count.
-     *
-     * @var int
      */
-    protected $count = 0;
+    protected int $count = 0;
 
     /**
      * Init swoole lock.
      */
     public function __construct()
     {
-        $this->lock = new \swoole_lock(SWOOLE_MUTEX);
+        $this->lock = new \Swoole\Lock(SWOOLE_MUTEX);
     }
 
     /**
-     *  {@inheritdoc}
+     * @throws SnowflakeException
      */
-    public function sequence(int $currentTime)
+    public function sequence(int $currentTime): int
     {
-        /*
-         * If swoole lock failure，we return a bit number, This will cause the program to
-         * perform the next millisecond operation.
-         */
-        if (!$this->lock->trylock()) {
+        // If swoole lock failure，we will return a big number, and recall this method when next millisecond.
+        if (! $this->lock->trylock()) {
             if ($this->count >= 10) {
-                throw new \Exception('Swoole lock failure, Unable to get the program lock after many attempts.');
+                throw new SnowflakeException('Swoole lock failure, Unable to get the program lock after many attempts.');
             }
 
-            ++$this->count;
+            $this->count++;
 
+            // return a big number
             return 999999;
         }
 
         if ($this->lastTimeStamp === $currentTime) {
-            ++$this->sequence;
+            $this->sequence++;
         } else {
             $this->sequence = 0;
         }
@@ -78,5 +70,10 @@ class SwooleSequenceResolver implements SequenceResolver
         $this->lock->unlock();
 
         return $this->sequence;
+    }
+
+    public function resetLock(\Swoole\Lock $lock): void
+    {
+        $this->lock = $lock;
     }
 }

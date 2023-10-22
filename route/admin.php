@@ -10,6 +10,7 @@ use app\http\middleware\mobile\MobileAuthTokenMiddleware;
 use think\facade\Config;
 use think\facade\Route;
 use think\Response;
+use think\swoole\response\File;
 
 Route::group('api', function () {
 
@@ -345,7 +346,7 @@ Route::group('api', function () {
                 'edit' => '获取修改配置分类接口',
                 'update' => '修改配置分类接口',
                 'delete' => '删除配置分类接口'
-            ]]);;
+            ]]);
             //系统配置资源路由
             Route::resource('config', 'system.Config')->option([
                 'real_name' => [

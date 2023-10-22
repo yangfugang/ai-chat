@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the godruoyi/php-snowflake.
  *
@@ -16,51 +18,43 @@ use RedisException;
 class RedisSequenceResolver implements SequenceResolver
 {
     /**
-     * The redis client instance.
-     *
-     * @var \Redis
-     */
-    protected $redis;
-
-    /**
      * The cache prefix.
+     */
+    protected string $prefix = '';
+
+    /**
+     * Init resolve instance, must be connected.
      *
-     * @var string
+     * @throws RedisException
      */
-    protected $prefix;
-
-    /**
-     * Init resolve instance, must connectioned.
-     */
-    public function __construct(Redis $redis)
+    public function __construct(protected Redis $redis)
     {
-        if ($redis->ping()) {
-            $this->redis = $redis;
-
-            return;
+        if (! $redis->ping()) {
+            throw new RedisException('Redis server went away');
         }
-
-        throw new RedisException('Redis server went away');
     }
 
     /**
-     *  {@inheritdoc}
+     * @throws RedisException
      */
-    public function sequence(int $currentTime)
+    public function sequence(int $currentTime): int
     {
-        $lua = "return redis.call('exists',KEYS[1])<1 and redis.call('psetex',KEYS[1],ARGV[2],ARGV[1])";
+        $lua = <<<'LUA'
+if redis.call('set', KEYS[1], ARGV[1], "EX", ARGV[2], "NX") then
+    return 0
+else
+    return redis.call('incr', KEYS[1])
+end
+LUA;
 
-        if ($this->redis->eval($lua, [($key = $this->prefix.$currentTime), 1, 1000], 1)) {
-            return 0;
-        }
-
-        return $this->redis->incrby($key, 1);
+        // 10 seconds
+        return $this->redis->eval($lua, [$this->prefix.$currentTime, '0', '10'], 1) | 0;
     }
 
     /**
-     * Set cacge prefix.
+     * Set cache prefix.
      */
-    public function setCachePrefix(string $prefix)
+    public function setCachePrefix(string $prefix): self
     {
         $this->prefix = $prefix;
 

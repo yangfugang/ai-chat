@@ -13,6 +13,7 @@ namespace app\webscoket;
 
 
 use Swoole\Table as SwooleTable;
+use think\swoole\pool\proxy\Store;
 use think\swoole\Table;
 
 /**
@@ -42,7 +43,7 @@ class Room
     protected $room = [];
 
     /**
-     * @var \Redis
+     * @var Store
      */
     protected $cache;
 

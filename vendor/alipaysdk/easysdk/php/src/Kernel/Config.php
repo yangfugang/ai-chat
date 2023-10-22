@@ -20,5 +20,7 @@ class Config extends Model
     public $alipayRootCertSN;
     public $notifyUrl;
     public $encryptKey;
+    public $httpProxy;
+    public $ignoreSSL;
 
 }

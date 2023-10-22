@@ -59,8 +59,9 @@ trait JwtAuthModelTrait
     public static function parseToken(string $jwt): array
     {
         JWT::$leeway = 60;
-
-        $data = JWT::decode($jwt, Env::get('app.app_key', 'default'), array('HS256'));
+        $headers = new \stdClass();
+        #$headers->alg = 'HS256';
+        $data = JWT::decode($jwt, Env::get('app.app_key', 'default'), $headers);
 
         $model = new self();
         return [$model->where($model->getPk(), $data->jti->id)->find(), $data->jti->type];

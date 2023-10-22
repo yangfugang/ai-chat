@@ -26,6 +26,7 @@ return [
         'swoole.start' => [\crmeb\listeners\SwooleStartListen::class],//swoole 启动事件
         'swoole.shutDown' => [\crmeb\listeners\SwooleShutdownListen::class],//swoole 停止事件
         'swoole.workerStart' => [\app\webscoket\SwooleWorkerStart::class],//socket 启动事件
+        'swoole.websocket.Open' => [\crmeb\listeners\SwooleOpenListen::class],//socket open事件
         'swoole.websocket.user' => [\app\webscoket\handler\UserHandler::class],//socket 用户调用事件
         'swoole.websocket.admin' => [\app\webscoket\handler\AdminHandler::class],//socket 后台事件
         'swoole.websocket.kefu' => [\app\webscoket\handler\KefuHandler::class],//socket 客服事件

@@ -21,7 +21,6 @@ use crmeb\services\FormBuilder;
 use crmeb\services\SwooleTaskService;
 use FormBuilder\Exception\FormBuilderException;
 use Psr\SimpleCache\InvalidArgumentException;
-use PullWord\PullWord;
 use Swoole\Timer;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;

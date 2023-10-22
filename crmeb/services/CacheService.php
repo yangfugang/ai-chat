@@ -11,6 +11,8 @@
 
 namespace crmeb\services;
 
+use think\cache\Driver;
+use think\cache\TagSet;
 use think\facade\Cache as CacheStatic;
 
 /**
@@ -153,7 +155,7 @@ class CacheService
     /**
      * 缓存句柄
      *
-     * @return \think\cache\TagSet|CacheStatic
+     * @return TagSet|CacheStatic
      */
     public static function handler(?string $cacheName = null)
     {
@@ -172,7 +174,7 @@ class CacheService
     /**
      * Redis缓存句柄
      * @param string|null $type
-     * @return \think\cache\Driver|\think\cache\TagSet
+     * @return Driver|TagSet
      */
     public static function redisHandler(string $type = null)
     {

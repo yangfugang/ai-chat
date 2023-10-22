@@ -21,8 +21,8 @@ use think\App;
 use think\Event;
 use think\Request;
 use think\response\Json;
-use think\swoole\Websocket;
-use think\swoole\websocket\Room;
+use app\webscoket;
+use app\webscoket\Room;
 use app\webscoket\Room as NowRoom;
 
 /**
@@ -62,16 +62,15 @@ class Manager extends Websocket
     /**
      * Manager constructor.
      * @param App $app
-     * @param Server $server
      * @param Room $room
      * @param Event $event
      * @param Response $response
      * @param Ping $ping
      * @param \app\webscoket\Room $nowRoom
      */
-    public function __construct(App $app, Server $server, Room $room, Event $event, Response $response, Ping $ping, NowRoom $nowRoom)
+    public function __construct(App $app, Room $room, Event $event, Response $response, Ping $ping, NowRoom $nowRoom)
     {
-        parent::__construct($app, $server, $room, $event);
+        parent::__construct($app, $room, $event);
         $this->response = $response;
         $this->pingService = $ping;
         $this->nowRoom = $nowRoom;

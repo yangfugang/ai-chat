@@ -158,7 +158,7 @@ class Captcha
         // 图片高(px)
         $this->imageH || $this->imageH = $this->fontSize * 2.5;
         // 建立一幅 $this->imageW x $this->imageH 的图像
-        $this->im = imagecreate($this->imageW, $this->imageH);
+        $this->im = imagecreate(round($this->imageW), round($this->imageH));
         // 设置背景
         imagecolorallocate($this->im, $this->bg[0], $this->bg[1], $this->bg[2]);
         mt_srand();
@@ -200,11 +200,11 @@ class Captcha
         mt_srand();
         foreach ($text as $index => $char) {
 
-            $x     = $this->fontSize * ($index + 1) * mt_rand(1.2, 1.6) * ($this->math ? 1 : 1.5);
+            $x     = $this->fontSize * ($index + 1) * (mt_rand(8, 12) / 10) * ($this->math ? 1 : 1.5);
             $y     = $this->fontSize + mt_rand(10, 20);
             $angle = $this->math ? 0 : mt_rand(-40, 40);
 
-            imagettftext($this->im, $this->fontSize, $angle, $x, $y, $this->color, $fontttf, $char);
+            imagettftext($this->im, $this->fontSize, $angle, ceil($x), $y, $this->color, $fontttf, $char);
         }
 
         ob_start();
@@ -340,7 +340,7 @@ class Captcha
             $noiseColor = imagecolorallocate($this->im, mt_rand(150, 225), mt_rand(150, 225), mt_rand(150, 225));
             for ($j = 0; $j < 5; $j++) {
                 // 绘杂点
-                imagestring($this->im, 5, mt_rand(-10, $this->imageW), mt_rand(-10, $this->imageH), $codeSet[mt_rand(0, 29)], $noiseColor);
+                imagestring($this->im, 5, mt_rand(-10, round($this->imageW)), mt_rand(-10, round($this->imageH)), $codeSet[mt_rand(0, 29)], $noiseColor);
             }
         }
     }

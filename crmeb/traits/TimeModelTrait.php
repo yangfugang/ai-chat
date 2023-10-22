@@ -27,9 +27,10 @@ trait TimeModelTrait
     /**
      * 设置时间查询字段
      * @param string $timeField
+     * @param string $updateTime
      * @return $this
      */
-    public function setTimeField(string $timeField)
+    public function setTimeField(string $timeField, string $updateTime)
     {
         $this->timeField = $timeField;
         return $this;

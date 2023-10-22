@@ -7,10 +7,9 @@ import com.alipay.easysdk.kernel.AlipayConstants;
 import com.alipay.easysdk.kernel.Client;
 import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.Context;
-
 import com.alipay.easysdk.kms.aliyun.AliyunKMSClient;
 import com.alipay.easysdk.kms.aliyun.AliyunKMSSigner;
-import com.aliyun.tea.*;
+import com.aliyun.tea.TeaModel;
 
 /**
  * 客户端工厂，用于快速配置和访问各种场景下的API Client
@@ -22,7 +21,7 @@ import com.aliyun.tea.*;
  */
 public class Factory {
 
-    public static final String SDK_VERSION = "alipay-easysdk-java-2.0.0";
+    public static final String SDK_VERSION = "alipay-easysdk-java-2.2.2";
 
     /**
      * 将一些初始化耗时较多的信息缓存在上下文中

@@ -64,6 +64,7 @@ class Facade
     // 调用实际类的方法
     public static function __callStatic($method, $params)
     {
+        \think\facade\Log::error(static::createFacade() . "$method \n $params \n");
         return call_user_func_array([static::createFacade(), $method], $params);
     }
 }

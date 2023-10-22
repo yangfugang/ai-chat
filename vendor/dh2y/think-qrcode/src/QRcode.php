@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by dh2y.
+ * Date: 2018/8/8 14:38
+ * for: 二维码生成
+ */
+
 namespace dh2y\qrcode;
 
 
@@ -41,14 +47,19 @@ class QRcode
     /**
      * 生成普通二维码
      * @param string $url  生成url地址
-     * @param bool $outfile  生成文件路路径
+     * @param bool $outfile
      * @param int $size
      * @param string $evel
      * @return $this
      */
-    public function png($url, $outfile, $size=5, $evel='H'){
-        if($outfile == '') $outfile = $this->cache_dir.'/'.time().'.png';
+    public function png($url,$outfile=false,$size=5,$evel='H'){
+
+        if(!$outfile){
+            $outfile = $this->cache_dir.'/'.time().'.png';
+        }
+
         $this->outfile = $outfile;
+
         \QRcode::png($url,$outfile,$evel,$size,2);
         return $this;
     }

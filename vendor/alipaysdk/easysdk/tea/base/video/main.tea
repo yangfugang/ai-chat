@@ -78,6 +78,8 @@ api upload(videoName: string, videoFilePath: string): AlipayOfflineMaterialImage
   }
   
 } runtime {
+  ignoreSSL = @kernel.getConfig("ignoreSSL"),
+  httpProxy = @kernel.getConfig("httpProxy"),
   connectTimeout = 100000,
   readTimeout = 100000,
   retry = {
